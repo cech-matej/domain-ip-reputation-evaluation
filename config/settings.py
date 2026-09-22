@@ -69,6 +69,7 @@ WHOISXML_DOMAIN_REPUTATION_API_KEY: str | None = env("WHOISXML_DOMAIN_REPUTATION
 # NETWORK SETTINGS
 # ============================================================
 # Global HTTP/network behavior.
+# Currently not used by the application, but defined here for future use.
 
 HTTP_TIMEOUT: int = int(env("HTTP_TIMEOUT", 10))
 HTTP_RETRIES: int = int(env("HTTP_RETRIES", 3))
