@@ -20,6 +20,11 @@ class OpentipKasperskyCollector(APICollector):
         super().__init__()
         self.api_key = OPENTIP_KASPERSKY_API_KEY
 
+    @staticmethod
+    def is_rate_limited(response):
+        # OpenTIP Kaspersky uses 403 for rate limiting; 429 is included for safety/future-proofing
+        return response.status_code in (403, 429)
+
     def collect(self, address: str) -> dict:
         headers = {
             "accept": "application/json",
