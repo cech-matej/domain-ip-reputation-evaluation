@@ -8,7 +8,7 @@ class HybridAnalysisCollector(APICollector):
     name = "hybrid_analysis"
 
     supports_domain = True
-    supports_ipv4 = True
+    supports_ipv4 = False
     supports_ipv6 = False
 
     BASE_URL = "https://hybrid-analysis.com"
@@ -84,7 +84,8 @@ class HybridAnalysisCollector(APICollector):
 
             avg_score = 0 if (data_len == 0 or data_len - null_score_cnt == 0) else sum_score / (data_len - null_score_cnt)
 
-            return {
+            # Add calculated/extracted properties to the original response
+            json_response["_extracted"] = {
                 "malicious_cnt": malicious_cnt,
                 "suspicious_cnt": suspicious_cnt,
                 "no_threat_cnt": no_threat_cnt,
@@ -94,20 +95,26 @@ class HybridAnalysisCollector(APICollector):
                 "avg_score": avg_score,
                 "null_score_cnt": null_score_cnt,
             }
+
+            return json_response
         else:
+            # Preserve the same response structure even when the request fails
             return {
-                "malicious_cnt": -1,
-                "suspicious_cnt": -1,
-                "no_threat_cnt": -1,
-                "whitelisted_cnt": -1,
-                "worst_score": -1,
-                "best_score": -1,
-                "avg_score": -1,
-                "null_score_cnt": -1,
+                "_extracted": {
+                    "malicious_cnt": -1,
+                    "suspicious_cnt": -1,
+                    "no_threat_cnt": -1,
+                    "whitelisted_cnt": -1,
+                    "worst_score": -1,
+                    "best_score": -1,
+                    "avg_score": -1,
+                    "null_score_cnt": -1,
+                }
             }
 
     def classify(self, data: dict) -> Verdict:
-        worst_score = data.get("worst_score", -1)
+        extracted = data.get("_extracted", {})
+        worst_score = extracted.get("worst_score", -1)
 
         if worst_score < 0:
             return Verdict.NO_DATA
